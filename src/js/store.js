@@ -1,6 +1,5 @@
-import { createStore, combineReducers, applyMiddleware } from 'redux';
-import todos from './reducers/todosReducer';
-import visibilityFilter from './reducers/visibilityFilterReducer';
+import { createStore, applyMiddleware } from 'redux';
+import rootReducer from './rootReducer';
 
 //middleware
 import createLogger from 'redux-logger';
@@ -9,10 +8,8 @@ const logger = createLogger();
 
 const middleware = [logger, thunk];
 
-const reducer = combineReducers({ todos, visibilityFilter });
-
 const store = createStore(
-  reducer,
+  rootReducer,
   {},
   applyMiddleware(...middleware)
 );
