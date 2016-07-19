@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 
+import Court from './Court.jsx'
+
 export default class Main extends Component {
   
   render() {
@@ -11,7 +13,7 @@ export default class Main extends Component {
         </div>
 
         <div className="row centered">
-          <canvas id="canvas" width="600" height="300" />
+          <Court />
         </div>
       </div>
     )
