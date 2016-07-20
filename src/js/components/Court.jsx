@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { getContext, display, handleEdge, handleKeyPress } from '../actions'
+import { getContext, move, handleEdge, display, handleKeyPress } from '../actions'
 
 import bg from '../game_objects/bg'
 
@@ -11,24 +11,27 @@ class Court extends Component {
   }
   
   componentDidMount() {
-    
+    requestAnimationFrame(() => {this.update()})
+  }
+  
+  update() {
     let {
           ball, paddleLeft, paddleRight, courtSize,
-          getContext, display, handleEdge
+          getContext, move, handleEdge, display
         } = this.props,
         objs = ['ball', 'paddleLeft', 'paddleRight']
     
     getContext(this._canvas.getContext("2d"))
     
     bg(this._canvas.getContext("2d"), courtSize)
+
     for (let i = 0; i < 3; i += 1) {
+      move(objs[i])
       handleEdge(objs[i])
       display(objs[i])
     }
     
-//    checkCollision()
-//    handleEdge()
-//    move()
+    requestAnimationFrame(() => {this.update()})
   }
   
   render() {
@@ -58,11 +61,14 @@ function mapDispatchToProps(dispatch) {
     getContext: (context) => {
       dispatch(getContext(context))
     },
-    display: (obj) => {
-      dispatch(display(obj))
+    move: (obj) => {
+      dispatch(move(obj))
     },
     handleEdge: (obj) => {
       dispatch(handleEdge(obj))
+    },
+    display: (obj) => {
+      dispatch(display(obj))
     },
     handleKeyPress: (event) => {
       dispatch(handleKeyPress(event))

@@ -8,15 +8,20 @@ export default function rootReducer (state = [], action) {
       newState.context = action.context
 
       return {...state, ...newState}
-    case "DISPLAY":
-
-      state[action.obj].display(state.context)
-
+    case "MOVE":
+      
+      state[action.obj].move()
+      
       return state
     case "HANDLE_EDGE":
       
       state[action.obj].handleEdge(state.courtSize)
       
+      return state
+    case "DISPLAY":
+
+      state[action.obj].display(state.context)
+
       return state
     case "HANDLE_KEY_PRESS":
       

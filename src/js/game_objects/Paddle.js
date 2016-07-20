@@ -1,10 +1,23 @@
 export default class Paddle {
   
-  constructor({ team, size, pos, speed }) {
+  constructor({ team, size, pos, speed, friction }) {
     this.team = team
     this.pos = pos
     this.size = size
     this.speed = speed
+    this.friction = friction
+  }
+  
+  move() {
+    if (this.speed.vel <= this.friction && this.speed.vel >= -this.friction) {
+      this.speed.vel = 0;
+    } else if (this.speed.vel >= 0.05) {
+      this.speed.vel -= this.friction;
+    } else if (this.speed.vel <= -0.05) {
+      this.speed.vel += this.friction;
+    }
+    
+    this.pos.y += this.speed.vel
   }
   
   handleEdge(court) {
@@ -12,12 +25,13 @@ export default class Paddle {
         {w: courtW, h: courtH} = court
 
     if (y > (courtH - this.size.h)) {
-      this.pos.y = courtH - this.size.h - 2;
+      this.pos.y = courtH - this.size.h - 1;
     } else if (y < 0) {
-      this.pos.y = 2;
+      this.pos.y = 1;
     }
+
     if ((y > (courtH - this.size.h)) || (y < 0)) {
-      this.vel *= -0.7;
+      this.speed.vel *= -0.5;
     }
   }
   
