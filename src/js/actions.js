@@ -5,18 +5,23 @@ export function getContext(context) {
   }
 }
 
-export function displayBall(ballPosition, ballSize) {
+export function display(obj) {
   return {
-    type: 'DISPLAY_BALL',
-    ballPosition,
-    ballSize
+    type: 'DISPLAY',
+    obj
   }
 }
 
-export function displayPaddle(paddlePosition, paddleSize) {
+export function handleEdge(obj) {
   return {
-    type: 'DISPLAY_PADDLE',
-    paddlePosition,
-    paddleSize
+    type: 'HANDLE_EDGE',
+    obj
+  }
+}
+
+export function handleKeyPress(event) {
+  return {
+    type: 'HANDLE_KEY_PRESS',
+    event
   }
 }
