@@ -1,8 +1,14 @@
 export default class Ball {
   
-  constructor({ size, pos }) {
+  constructor({ size, pos, speed }) {
     this.size = size;
     this.pos = pos;
+    this.speed = speed;
+  }
+  
+  move() {
+    this.pos.y += this.speed.vel.y;
+    this.pos.x += this.speed.vel.x;
   }
   
   handleEdge(court) {
@@ -15,7 +21,7 @@ export default class Ball {
       this.pos.y = 2;
     }
     if ((y > (courtH - this.size.h)) || (y < 0)) {
-      this.vel *= -1;
+      this.speed.vel *= -1;
     }
   }
   

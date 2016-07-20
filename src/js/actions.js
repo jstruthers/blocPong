@@ -5,16 +5,23 @@ export function getContext(context) {
   }
 }
 
-export function display(obj) {
+export function handleEdge(obj) {
   return {
-    type: 'DISPLAY',
+    type: 'HANDLE_EDGE',
     obj
   }
 }
 
-export function handleEdge(obj) {
+export function move(obj) {
   return {
-    type: 'HANDLE_EDGE',
+    type: 'MOVE',
+    obj
+  }
+}
+
+export function display(obj) {
+  return {
+    type: 'DISPLAY',
     obj
   }
 }
