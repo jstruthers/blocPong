@@ -8,25 +8,27 @@ export default function rootReducer (state = [], action) {
       newState.context = action.context
 
       return {...state, ...newState}
-    case "DISPLAY_BALL":
+    case "DISPLAY":
+
+      state[action.obj].display(state.context)
+
+      return state
+    case "HANDLE_EDGE":
       
-      let { x: ballX, y: ballY } = action.ballPosition
-
-      state.context.strokeStyle = "black"
-      state.context.beginPath()
-      state.context.arc(ballX, ballY, action.ballSize, 0, Math.PI * 2)
-      state.context.stroke()
-
-      return state;
-    case "DISPLAY_PADDLE":
+      state[action.obj].handleEdge(state.courtSize)
       
-      let { x: paddleX, y: paddleY } = action.paddlePosition,
-          { w: paddleW, h: paddleH } = action.paddleSize
-
-      state.context.strokeStyle = "black"
-      state.context.strokeRect(paddleX, paddleY, paddleW, paddleH)
-
-      return state;
+      return state
+    case "HANDLE_KEY_PRESS":
+      
+      newState.paddleLeft = state.paddleLeft
+      newState.paddleLeft.speed = state.paddleLeft.speed
+      
+      switch(action.event.keyCode) {
+        case 87: newState.paddleLeft.speed.vel -= state.paddleLeft.speed.acc; break
+        case 83: newState.paddleLeft.speed.vel += state.paddleLeft.speed.acc; break
+      }
+      
+      return {...state, ...newState}
     default:
       return state
   }

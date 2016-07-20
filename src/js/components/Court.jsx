@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { getContext, displayBall, displayPaddle } from '../actions'
+import { getContext, display, handleEdge, handleKeyPress } from '../actions'
 
 import bg from '../game_objects/bg'
 
@@ -13,25 +13,34 @@ class Court extends Component {
   componentDidMount() {
     
     let {
-      ball,
-      paddleLeft,
-      paddleRight,
-      courtSize,
-      getContext,
-      displayBall,
-      displayPaddle
-    } = this.props
+          ball, paddleLeft, paddleRight, courtSize,
+          getContext, display, handleEdge
+        } = this.props,
+        objs = ['ball', 'paddleLeft', 'paddleRight']
     
     getContext(this._canvas.getContext("2d"))
     
     bg(this._canvas.getContext("2d"), courtSize)
-    displayBall(ball.pos, ball.size)
-    displayPaddle(paddleLeft.pos, paddleLeft.size)
-    displayPaddle(paddleRight.pos, paddleRight.size)
+    for (let i = 0; i < 3; i += 1) {
+      handleEdge(objs[i])
+      display(objs[i])
+    }
+    
+//    checkCollision()
+//    handleEdge()
+//    move()
   }
   
   render() {
-    return (<canvas id="canvas" ref={ (c) => this._canvas = c } width="600" height="300" />)
+    return (
+      <canvas
+          id="canvas"
+          ref={ (c) => this._canvas = c }
+          width={ this.props.courtSize.w }
+          height={ this.props.courtSize.h }
+          tabIndex="0"
+          onKeyDown={ this.props.handleKeyPress } />
+    )
   }
 }
 
@@ -49,11 +58,14 @@ function mapDispatchToProps(dispatch) {
     getContext: (context) => {
       dispatch(getContext(context))
     },
-    displayBall: (pos, size) => {
-      dispatch(displayBall(pos, size))
+    display: (obj) => {
+      dispatch(display(obj))
     },
-    displayPaddle: (pos, size) => {
-      dispatch(displayPaddle(pos, size))
+    handleEdge: (obj) => {
+      dispatch(handleEdge(obj))
+    },
+    handleKeyPress: (event) => {
+      dispatch(handleKeyPress(event))
     }
   }
 }
