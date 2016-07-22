@@ -1,3 +1,5 @@
+import { copy, getNormals, normalize } from '../helper_functions/vectors'
+
 export default class Paddle {
   
   constructor({ team, size, pos, speed, friction }) {
@@ -6,6 +8,34 @@ export default class Paddle {
     this.size = size
     this.speed = speed
     this.friction = friction
+    this.points =
+      (() => {
+        let {x, y} = this.pos,
+            {w, h} = this.size
+        return [
+          {x, y},
+          {x: x + w, y},
+          {x: x + w, y: y + h},
+          {x, y: y + h}
+        ]
+      })()
+  }
+  
+  recalc() {
+    let points = this.points,
+        len = points.length
+    this.edges = []
+    this.normals = []
+    for (var i = 0; i < len; i++) {
+        let p1 = points[i],
+            p2 = i < len - 1 ? points[i + 1] : points[0],
+            edge = {x: p2.x - p1.x, y: p2.y - p1.y},
+            normal = copy(edge)
+        normal = getNormals(normal).right
+        normal = normalize(normal)
+        this.edges.push(edge)
+        this.normals.push(normal)
+    }
   }
   
   move() {

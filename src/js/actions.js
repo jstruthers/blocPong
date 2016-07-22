@@ -5,6 +5,12 @@ export function getContext(context) {
   }
 }
 
+export function launch() {
+  return {
+    type: 'LAUNCH'
+  }
+}
+
 export function handleEdge(obj) {
   return {
     type: 'HANDLE_EDGE',
@@ -16,6 +22,21 @@ export function move(obj) {
   return {
     type: 'MOVE',
     obj
+  }
+}
+
+export function recalc(obj) {
+  return {
+    type: 'RECALC',
+    obj
+  }
+}
+
+export function handleCollision(paddle, ball) {
+  return {
+    type: 'HANDLE_COLLISION',
+    paddle,
+    ball
   }
 }
 
