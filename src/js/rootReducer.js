@@ -1,5 +1,7 @@
+import { testPolygonCircle } from './helper_functions/vectors'
+
 export default function rootReducer (state = [], action) {
-  
+
   let newState = {}
   
   switch(action.type){
@@ -8,6 +10,11 @@ export default function rootReducer (state = [], action) {
       newState.context = action.context
 
       return {...state, ...newState}
+    case "LAUNCH":
+      
+      state.ball.launch(state.courtSize)
+      
+      return state
     case "MOVE":
       
       state[action.obj].move()
@@ -16,6 +23,18 @@ export default function rootReducer (state = [], action) {
     case "HANDLE_EDGE":
       
       state[action.obj].handleEdge(state.courtSize)
+      
+      return state
+    case "RECALC":
+      
+      state[action.obj].recalc()
+      
+      return state
+    case "HANDLE_COLLISION":
+      
+      let collision = testPolygonCircle(action.paddle, action.ball)
+
+      state.ball.handleCollision(collision, -action.paddle.speed.vel)
       
       return state
     case "DISPLAY":

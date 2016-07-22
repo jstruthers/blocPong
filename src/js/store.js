@@ -13,7 +13,7 @@ const middleware = [logger, thunk],
       court = { w: 600, h: 300},
       paddleSize = {w: 10, h: 50},
       paddleSpeed = 3,
-      ballSpeed = 1,
+      ballSpeed = 5,
       friction = 0.05
 
 const store = createStore(

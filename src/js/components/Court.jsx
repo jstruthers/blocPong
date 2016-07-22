@@ -1,6 +1,15 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { getContext, move, handleEdge, display, handleKeyPress } from '../actions'
+import {
+  getContext,
+  launch,
+  move,
+  handleEdge,
+  recalc,
+  handleCollision,
+  display,
+  handleKeyPress
+} from '../actions'
 
 import bg from '../game_objects/bg'
 
@@ -8,18 +17,32 @@ class Court extends Component {
   
   constructor(props) {
     super(props)
+    this.state = {
+      running: null
+    }
   }
   
-  componentDidMount() {
-    requestAnimationFrame(() => {this.update()})
+  beginGame() {
+    this.setState({
+      running: window.requestAnimationFrame(this.update.bind(this))
+    })
+    this.props.launch()
+  }
+  
+  endGame() {
+    this.props.launch()
+    window.cancelAnimationFrame(this.state.running)
+    this.setState({
+      running: null
+    })
   }
   
   update() {
     let {
           ball, paddleLeft, paddleRight, courtSize,
-          getContext, move, handleEdge, display
+          getContext, move, handleEdge, recalc, handleCollision, display
         } = this.props,
-        objs = ['ball', 'paddleLeft', 'paddleRight']
+        objs = ['paddleLeft', 'paddleRight', 'ball']
     
     getContext(this._canvas.getContext("2d"))
     
@@ -28,21 +51,35 @@ class Court extends Component {
     for (let i = 0; i < 3; i += 1) {
       move(objs[i])
       handleEdge(objs[i])
+      if (i < 2) { recalc(objs[i]) }
+      else {
+        if (ball.pos.x <= courtSize.w/2) {
+          handleCollision(paddleLeft, ball)
+        } else {
+          handleCollision(paddleRight, ball)
+        }
+      }
       display(objs[i])
     }
     
-    requestAnimationFrame(() => {this.update()})
+    this.setState({
+      running: window.requestAnimationFrame(this.update.bind(this)) 
+    })
   }
   
   render() {
+
     return (
       <canvas
           id="canvas"
           ref={ (c) => this._canvas = c }
           width={ this.props.courtSize.w }
           height={ this.props.courtSize.h }
+          onFocus={ this.beginGame.bind(this) }
+          onBlur={ this.endGame.bind(this) }
           tabIndex="0"
-          onKeyDown={ this.props.handleKeyPress } />
+          onKeyDown={ this.props.handleKeyPress }
+          onClick={ this.props.launch } />
     )
   }
 }
@@ -61,11 +98,20 @@ function mapDispatchToProps(dispatch) {
     getContext: (context) => {
       dispatch(getContext(context))
     },
+    launch: () => {
+      dispatch(launch())
+    },
     move: (obj) => {
       dispatch(move(obj))
     },
     handleEdge: (obj) => {
       dispatch(handleEdge(obj))
+    },
+    recalc: (obj) => {
+      dispatch(recalc(obj))
+    },
+    handleCollision: (ball, paddle) => {
+      dispatch(handleCollision(ball, paddle))
     },
     display: (obj) => {
       dispatch(display(obj))
