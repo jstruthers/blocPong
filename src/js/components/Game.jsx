@@ -4,16 +4,14 @@ import {
   getContext,
   launch,
   move,
-  handleEdge,
-  recalc,
   handleCollision,
   display,
   handleKeyPress
 } from '../actions'
 
-import bg from '../game_objects/bg'
+import Collider from '../game_objects/Collider.js'
 
-class Court extends Component {
+class Game extends Component {
   
   constructor(props) {
     super(props)
@@ -39,26 +37,45 @@ class Court extends Component {
   
   update() {
     let {
-          ball, paddleLeft, paddleRight, courtSize,
-          getContext, move, handleEdge, recalc, handleCollision, display
+          ball, paddleLeft, paddleRight, court, collider,
+          getContext, move, handleCollision, display
         } = this.props,
         objs = ['paddleLeft', 'paddleRight', 'ball']
     
-    getContext(this._canvas.getContext("2d"))
-    
-    bg(this._canvas.getContext("2d"), courtSize)
+    function checkPaddleCollision(ball, paddle) {
 
-    for (let i = 0; i < 3; i += 1) {
-      move(objs[i])
-      handleEdge(objs[i])
-      if (i < 2) { recalc(objs[i]) }
-      else {
-        if (ball.pos.x <= courtSize.w/2) {
-          handleCollision(paddleLeft, ball)
-        } else {
-          handleCollision(paddleRight, ball)
-        }
+      if (ball.hasOwnProperty('radius')) {
+        let nearestPoint = ball.nearestPoint(paddle.points)[1]
+        ball.getPoints(paddle, nearestPoint)
+        ball.getNormals(paddle)
       }
+
+      let result = collider.checkCollision(ball, paddle)
+
+      if (result) { handleCollision('ball', [result, paddle]) }
+    }
+    
+    function checkBoundaries(objA, objA_Name) {
+      let result = collider.checkBoundaries(objA, court.boundaries)
+      if (result) { handleCollision(objA_Name, result) }
+    }
+    
+    getContext(this._canvas.getContext("2d"))
+
+    display('court')
+    
+    for (let i = 0; i < objs.length; i += 1) {
+
+      move(objs[i])
+
+      checkBoundaries(this.props[objs[i]], objs[i])
+      
+      if (ball.pos.x <= court.size.w/2 && i === objs.length - 1) {
+        checkPaddleCollision(ball, paddleLeft)
+      } else {
+        checkPaddleCollision(ball, paddleRight)
+      }
+
       display(objs[i])
     }
     
@@ -73,8 +90,8 @@ class Court extends Component {
       <canvas
           id="canvas"
           ref={ (c) => this._canvas = c }
-          width={ this.props.courtSize.w }
-          height={ this.props.courtSize.h }
+          width={ this.props.court.size.w }
+          height={ this.props.court.size.h }
           onFocus={ this.beginGame.bind(this) }
           onBlur={ this.endGame.bind(this) }
           tabIndex="0"
@@ -89,7 +106,8 @@ function mapStateToProps(state) {
     ball: state.ball,
     paddleLeft: state.paddleLeft,
     paddleRight: state.paddleRight,
-    courtSize: state.courtSize
+    collider: state.collider,
+    court: state.court
   }
 }
 
@@ -104,22 +122,16 @@ function mapDispatchToProps(dispatch) {
     move: (obj) => {
       dispatch(move(obj))
     },
-    handleEdge: (obj) => {
-      dispatch(handleEdge(obj))
-    },
-    recalc: (obj) => {
-      dispatch(recalc(obj))
-    },
-    handleCollision: (ball, paddle) => {
-      dispatch(handleCollision(ball, paddle))
+    handleCollision: (objA, result) => {
+      dispatch(handleCollision(objA, result))
     },
     display: (obj) => {
       dispatch(display(obj))
     },
     handleKeyPress: (event) => {
-      dispatch(handleKeyPress(event))
+      dispatch(handleKeyPress(event.keyCode))
     }
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Court);
+export default connect(mapStateToProps, mapDispatchToProps)(Game);

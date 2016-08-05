@@ -11,13 +11,6 @@ export function launch() {
   }
 }
 
-export function handleEdge(obj) {
-  return {
-    type: 'HANDLE_EDGE',
-    obj
-  }
-}
-
 export function move(obj) {
   return {
     type: 'MOVE',
@@ -25,18 +18,11 @@ export function move(obj) {
   }
 }
 
-export function recalc(obj) {
-  return {
-    type: 'RECALC',
-    obj
-  }
-}
-
-export function handleCollision(paddle, ball) {
+export function handleCollision(obj, result) {
   return {
     type: 'HANDLE_COLLISION',
-    paddle,
-    ball
+    obj,
+    result // array with result as index [0] and objB as index [1]
   }
 }
 
@@ -47,9 +33,9 @@ export function display(obj) {
   }
 }
 
-export function handleKeyPress(event) {
+export function handleKeyPress(keyCode) {
   return {
     type: 'HANDLE_KEY_PRESS',
-    event
+    keyCode
   }
 }

@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 
-import Court from './Court.jsx'
+import Game from './Game.jsx'
+import Score from './Score.jsx'
 
 export default class Main extends Component {
   
   render() {
     return (
-      
       <div id="container"
            className="column">
         <div className="row centered">
@@ -14,7 +14,11 @@ export default class Main extends Component {
         </div>
 
         <div className="row centered">
-          <Court />
+          <Game />
+        </div>
+        
+        <div className="row centered">
+          <Score />
         </div>
       </div>
     )
