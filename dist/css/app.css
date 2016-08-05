@@ -1,0 +1,36 @@
+body {
+  color: #00f;
+  font-family: sans-serif;
+}
+#canvas {
+  width: 600px;
+  height: 300px;
+  position: relative;
+  margin: 20px;
+  border: 1px solid #000;
+}
+.row {
+  display: -webkit-flex;
+  display: flex;
+  width: 100%;
+}
+.column {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+          flex-direction: column;
+  height: 100%;
+}
+.centered {
+  -webkit-justify-content: center;
+          justify-content: center;
+  -webkit-align-items: center;
+          align-items: center;
+}
+#score {
+  width: 400px;
+}
+#players {
+  -webkit-justify-content: space-around;
+          justify-content: space-around;
+}
