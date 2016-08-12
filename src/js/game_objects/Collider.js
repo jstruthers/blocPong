@@ -51,8 +51,8 @@ export default class Collider {
     let correctionVectors = [];
     // project points of objA and objB onto objA's normals
     // check for overlap
-    if (!objA.normals) {objA.getNormals()}
-    if (!objB.normals) {objB.getNormals()}
+    if (!objA.normals) { objA.getNormals() }
+    if (!objB.normals) { objB.getNormals() }
     for (let i = 0; i < objA.normals.length; i += 1) {
       let result = this.checkNormal(objA, objB, objA.normals[i]);
       if (result.isIntersecting) {

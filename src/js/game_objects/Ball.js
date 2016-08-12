@@ -19,15 +19,13 @@ export default class Ball {
   }
   
   launch(court) {
-    let flip = () => Math.floor(Math.random() * 3)
+    let flip = () => Math.floor(Math.random() * 2)
 
     if (this.vel.pos.x === 0 && this.vel.pos.y === 0) {
       this.vel.pos.x -= this.acc
-      switch(flip()) {
-        case 0: this.vel.pos.y += this.acc; break
-        case 1: this.vel.pos.y -= this.acc; break
-        case 2: this.vel.pos.y = 0; break
-      }
+      this.vel.pos.y += flip > 0
+        ? this.acc / 2
+        : -this.acc / 2
     } else {
       this.vel.pos.x = 0
       this.vel.pos.y = 0
@@ -40,12 +38,9 @@ export default class Ball {
   }
   
   handleCollision(result) {
-    console.log(result)
     if (typeof result[1] === 'object') {
-      this.vel.pos.x += result[1].team === "left"
-        ? result[0].correction.pos.x * 0.8
-        : result[0].correction.pos.x * 0.2
-      this.vel.pos.y -= Math.floor(result[1].vel.pos.y * 0.6)
+      this.vel.pos.x += result[0].correction.copy().normalize().scale(1).pos.x
+      this.vel.pos.y += result[0].correction.copy().normalize().scale(1).pos.y
     } else {
       this.vel.pos.y *= -1
     }
@@ -75,14 +70,16 @@ export default class Ball {
     ]
   }
   
-  getNormals(objB) {
-    let v = new Vector({
-      pos: {
-        x: objB.pos.x - this.pos.x,
-        y: objB.pos.y - this.pos.y
-      }
+  getNormals() {
+    this.normals = this.points.map((point, i) => {
+      let v = new Vector({
+        pos: {
+          x: this.points[i].pos.x - this.pos.x,
+          y: this.points[i].pos.y - this.pos.y
+        }
+      })
+      return v.leftNormal().normalize()
     })
-    this.normals = [v.leftNormal().normalize()]
   }
   
   updateBoundingBox() {
@@ -112,10 +109,21 @@ export default class Ball {
   }
   
   display(ctx) {
-    ctx.strokeStyle = "black"
-    ctx.lineWidth = 1
+    let grd = ctx.createRadialGradient(
+      this.pos.x, this.pos.y, this.radius/5,
+      this.pos.x, this.pos.y, this.radius
+    )
+    grd.addColorStop(0, "aqua");
+    grd.addColorStop(0.5, "turquoise");
+    grd.addColorStop(1, 'deepskyblue')
+
+    ctx.fillStyle = grd
+    ctx.strokeStyle = 'teal'
+    ctx.lineWidth = 1.5
     ctx.beginPath()
     ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2)
+    ctx.closePath()
+    ctx.fill()
     ctx.stroke()
   }
 }

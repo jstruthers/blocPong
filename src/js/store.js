@@ -13,13 +13,19 @@ import Court from './game_objects/Court.js'
 import Collider from './game_objects/Collider.js'
 
 const middleware = [logger, thunk],
-      court = { w: 600, h: 300},
-      paddleXOffset = 30,
-      paddleSize = {w: 15, h: 50},
+      court = { w: 600, h: 500},
+      paddleXOffset = 40,
+      paddleSize = {w: 15, h: 70},
       paddleSpeed = 3,
       ballRadius = 7,
-      ballSpeed = 4,
-      friction = 0.05
+      ballSpeed = 3,
+      friction = 0.1,
+      rotation = {
+        rotAcc: 1,
+        orientation: 0,
+        angle: 0,
+        burst: 0
+      }
 
 const store = createStore(
   rootReducer,
@@ -54,7 +60,8 @@ const store = createStore(
       ],
       acc: paddleSpeed,
       vel: new Vector({pos: {x: 0, y: 0}}),
-      friction
+      friction,
+      rotation
     }),
     paddleRight: new Paddle(   
       {
@@ -88,7 +95,8 @@ const store = createStore(
         ],
         acc: paddleSpeed,
         vel: new Vector({pos: {x: 0, y: 0}}),
-        friction
+        friction,
+        rotation
       }),
     ball: new Ball({
         radius: ballRadius,

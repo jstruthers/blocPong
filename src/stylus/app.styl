@@ -1,19 +1,78 @@
-@import 'components/_components'
-
-
-
 body
-  color blue
-  font-family sans-serif
+  background-color aquamarine
+  font-family Avenir, sans-serif
+  margin 0
+
+h1, h2, h3, h4
+  margin 0
+
+#game
+  height 630px
+  padding-top 10px
+  background-image url("../pongBG.png")
+  background-position center center
+  background-repeat no-repeat
   
+
+#title
+  font-size 3em
+  color #8aa
+
+#pongCourt
+  width 600px
+  height 500px
+  
+
+#pongBG
+  position absolute
+  z-index -2
+  left -300px
+  top 80px
+  width 2105px
+  height 634px
+
 #canvas
   width 600px
-  height 300px
+  height 500px
   
   position relative
-  margin 20px
 
-  border 1px solid black
+  &:focus
+    outline none
+
+.hidden
+  display none
+
+.revealed
+  display visible
+    
+.player
+  &-display
+    height 140px
+    width 80px
+  
+  &-title, &-score
+    background-color white
+    border 3px solid #CCC
+    height 1.5em
+    padding 10px
+  
+  &-title
+    width 60px
+    margin-bottom 20px
+
+  &-score
+    width 40px
+
+#left
+  margin-right 80px
+  border 10px solid steelblue
+  color steelblue
+  
+#right
+  margin-left 80px
+  border 10px solid crimson
+  color firebrick
 
 .row
   display flex
@@ -22,14 +81,7 @@ body
 .column
   display flex
   flex-direction column
-  height 100%
 
 .centered
   justify-content center
   align-items center
-
-#score
-  width 400px
-  
-#players
-  justify-content space-around

@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import KeyHandler, { KEYPRESS, KEYDOWN, KEYUP } from 'react-key-handler'
 import {
   getContext,
   launch,
   move,
   handleCollision,
-  display,
-  handleKeyPress
+  display
 } from '../actions'
 
 import Collider from '../game_objects/Collider.js'
@@ -16,13 +16,16 @@ class Game extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      running: null
+      running: null,
+      plr: props.paddleLeft.rotation,
+      hideCourt: false
     }
   }
   
   beginGame() {
     this.setState({
-      running: window.requestAnimationFrame(this.update.bind(this))
+      running: window.requestAnimationFrame(this.update.bind(this)),
+      hideCourt: true
     })
     this.props.launch()
   }
@@ -35,20 +38,32 @@ class Game extends Component {
     })
   }
   
+  playerUp() {
+    this.props.paddleLeft.vel.pos.y -= this.props.paddleLeft.acc;
+  }
+  
+  playerDown() {
+    this.props.paddleLeft.vel.pos.y += this.props.paddleLeft.acc;
+  }
+  
+  playerBurst() {
+    this.props.paddleLeft.windingUp[0] = false
+    this.props.paddleLeft.fullyCharged = false
+    this.state.plr.angle -= this.state.plr.burst * 0.25
+    this.state.plr.burst = 0
+  }
+  
   update() {
     let {
-          ball, paddleLeft, paddleRight, court, collider,
-          getContext, move, handleCollision, display
+          ball, paddleLeft, paddleRight, court,
+          collider, move, handleCollision, display, getContext
         } = this.props,
         objs = ['paddleLeft', 'paddleRight', 'ball']
     
     function checkPaddleCollision(ball, paddle) {
-
-      if (ball.hasOwnProperty('radius')) {
-        let nearestPoint = ball.nearestPoint(paddle.points)[1]
-        ball.getPoints(paddle, nearestPoint)
-        ball.getNormals(paddle)
-      }
+      let nearestPoint = ball.nearestPoint(paddle.points)[1]
+      ball.getPoints(paddle, nearestPoint)
+      ball.getNormals(paddle)
 
       let result = collider.checkCollision(ball, paddle)
 
@@ -61,13 +76,12 @@ class Game extends Component {
     }
     
     getContext(this._canvas.getContext("2d"))
-
     display('court')
+    paddleRight.autoPilot(ball)
     
     for (let i = 0; i < objs.length; i += 1) {
-
+      
       move(objs[i])
-
       checkBoundaries(this.props[objs[i]], objs[i])
       
       if (ball.pos.x <= court.size.w/2 && i === objs.length - 1) {
@@ -85,18 +99,36 @@ class Game extends Component {
   }
   
   render() {
+    
+    let { paddleLeft } = this.props
 
     return (
-      <canvas
-          id="canvas"
-          ref={ (c) => this._canvas = c }
-          width={ this.props.court.size.w }
-          height={ this.props.court.size.h }
-          onFocus={ this.beginGame.bind(this) }
-          onBlur={ this.endGame.bind(this) }
-          tabIndex="0"
-          onKeyDown={ this.props.handleKeyPress }
-          onClick={ this.props.launch } />
+      <div>
+        <KeyHandler keyEventName={KEYPRESS} keyValue="w" onKeyHandle={this.playerUp.bind(this)} />
+        <KeyHandler keyEventName={KEYPRESS} keyValue="s" onKeyHandle={this.playerDown.bind(this)} />
+        <KeyHandler keyEventName={KEYPRESS} keyValue="a"
+                    onKeyHandle={
+                      paddleLeft.fullyCharged
+                        ? this.playerBurst.bind(this)
+                        : () => paddleLeft.windingUp = [true, -1]} />
+        <KeyHandler keyEventName={KEYPRESS} keyValue="d"
+                    onKeyHandle={
+                      paddleLeft.fullyCharged
+                        ? this.playerBurst.bind(this)
+                        : () => paddleLeft.windingUp = [true, 1]} />
+        <canvas
+            id="canvas"
+            className={ this.state.hideCourt ? 'revealed' : 'hidden' }
+            ref={ (c) => this._canvas = c }
+            width={ this.props.court.size.w }
+            height={ this.props.court.size.h }
+            onBlur={ this.endGame.bind(this) }
+            onClick={ this.props.launch } />
+        <img className={ this.state.hideCourt ? 'hidden' : 'revealed' }
+             onFocus={ this.beginGame.bind(this) }
+             tabIndex="0"
+             id="pongCourt" src="./pongCourt.png" alt=""/>
+      </div>
     )
   }
 }
@@ -127,9 +159,6 @@ function mapDispatchToProps(dispatch) {
     },
     display: (obj) => {
       dispatch(display(obj))
-    },
-    handleKeyPress: (event) => {
-      dispatch(handleKeyPress(event.keyCode))
     }
   }
 }

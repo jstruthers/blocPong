@@ -32,10 +32,3 @@ export function display(obj) {
     obj
   }
 }
-
-export function handleKeyPress(keyCode) {
-  return {
-    type: 'HANDLE_KEY_PRESS',
-    keyCode
-  }
-}

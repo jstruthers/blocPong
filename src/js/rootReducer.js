@@ -24,9 +24,7 @@ export default function rootReducer (state = [], action) {
       
       // action hasProps { obj, result }
       // result is array with result obj as index [0] and objB as index [1]
-
       if (action.result[0].isIntersecting) {
-        console.log(action)
         if (action.obj === 'ball' && (action.result[1] === 1 || action.result[1] === 3)) {
           let givePoints = action.result[1] === 1 ? 'left' : 'right'
           newState.score = state.score
@@ -40,11 +38,6 @@ export default function rootReducer (state = [], action) {
     case "DISPLAY":
 
       state[action.obj].display(state.context)
-
-      return state
-    case "HANDLE_KEY_PRESS":
-
-      state.paddleLeft.handleKeyPress(action.keyCode)
 
       return state
     default:
