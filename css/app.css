@@ -1,7 +1,132 @@
+#currentWindow,
+#canvas {
+  position: relative;
+  width: 580px;
+  height: 480px;
+}
+#currentWindow {
+  top: -40px;
+  -webkit-align-items: center;
+          align-items: center;
+  -webkit-justify-content: space-around;
+          justify-content: space-around;
+  background-color: #f5f5dc;
+}
+#menuButtons {
+  height: 70px;
+  -webkit-justify-content: space-around;
+          justify-content: space-around;
+  margin-top: 40px;
+}
+#menuButtons .row {
+  -webkit-flex-wrap: wrap;
+          flex-wrap: wrap;
+}
+#instructions {
+  width: 460px;
+  -webkit-justify-content: space-around;
+          justify-content: space-around;
+  -webkit-align-items: center;
+          align-items: center;
+}
+#instructions li {
+  padding-top: 10px;
+}
+#instructions button {
+  margin-bottom: 20px;
+}
+#instructions h3 {
+  width: 150px;
+  padding: 0 10px;
+  letter-spacing: 1px;
+  border-left: 3px solid #008080;
+  border-bottom: 3px solid #40e0d0;
+}
+#instructions .hidden,
+#instructions span {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.info-text {
+  height: 300px;
+}
+#infoButtons button {
+  margin-left: 20px;
+  font-size: 1.2rem;
+  padding: 5px;
+  border-width: 5px;
+}
+#winScreen h2 {
+  margin-bottom: 20px;
+  font-size: 2rem;
+}
+.player-display {
+  position: relative;
+  top: -45px;
+  height: 225px;
+  -webkit-justify-content: space-between;
+          justify-content: space-between;
+  -webkit-align-items: center;
+          align-items: center;
+  color: #32cd32;
+}
+.player-display button {
+  height: 40px;
+  width: 110px;
+  margin-bottom: 10px;
+  padding: 2px;
+  font-size: 1rem;
+}
+.player-title,
+.player-score {
+  height: 1.5rem;
+  padding: 10px;
+}
+#left {
+  position: relative;
+  left: 20px;
+  margin-right: 100px;
+}
+#right {
+  position: relative;
+  left: -20px;
+  margin-left: 100px;
+}
+button {
+  font-family: Avenir, sans-serif;
+  letter-spacing: 1px;
+  padding: 10px 20px;
+  font-size: 1.4rem;
+  background-color: #fff;
+  box-sizing: border-box;
+  border-radius: 3px;
+  border: 7px solid #7fffd4;
+  border-top: 7px solid #008080;
+  border-left: 7px solid #008080;
+  transition: all 0.1s ease-in;
+}
+button:hover {
+  cursor: pointer;
+  -webkit-transform: scale(1.03) translate(0px, 1.5px);
+          transform: scale(1.03) translate(0px, 1.5px);
+}
+button:disabled {
+  border: 7px solid #999;
+  border-top: 7px solid #555;
+  border-left: 7px solid #555;
+  background-color: #ccc;
+  color: #999;
+}
+button:disabled:hover {
+  -webkit-transform: none;
+          transform: none;
+  cursor: default;
+}
 body {
-  background-color: #7fffd4;
+  background-color: #40e0d0;
   font-family: Avenir, sans-serif;
   margin: 0;
+  font-size: 1em;
 }
 h1,
 h2,
@@ -9,20 +134,21 @@ h3,
 h4 {
   margin: 0;
 }
-#game {
+span:hover,
+h1:hover,
+h2:hover,
+h3:hover,
+h4:hover,
+p:hover {
+  cursor: default;
+}
+#container {
+  position: relative;
   height: 630px;
-  padding-top: 10px;
+  padding-top: 80px;
   background-image: url("../pongBG.png");
   background-position: center center;
   background-repeat: no-repeat;
-}
-#title {
-  font-size: 3em;
-  color: #8aa;
-}
-#pongCourt {
-  width: 600px;
-  height: 500px;
 }
 #pongBG {
   position: absolute;
@@ -32,47 +158,14 @@ h4 {
   width: 2105px;
   height: 634px;
 }
-#canvas {
-  width: 600px;
-  height: 500px;
-  position: relative;
-}
-#canvas:focus {
-  outline: none;
-}
+/********************
+   UTILITY CLASSES
+********************/
 .hidden {
   display: none;
 }
 .revealed {
   display: visible;
-}
-.player-display {
-  height: 140px;
-  width: 80px;
-}
-.player-title,
-.player-score {
-  background-color: #fff;
-  border: 3px solid #ccc;
-  height: 1.5em;
-  padding: 10px;
-}
-.player-title {
-  width: 60px;
-  margin-bottom: 20px;
-}
-.player-score {
-  width: 40px;
-}
-#left {
-  margin-right: 80px;
-  border: 10px solid #4682b4;
-  color: #4682b4;
-}
-#right {
-  margin-left: 80px;
-  border: 10px solid #dc143c;
-  color: #b22222;
 }
 .row {
   display: -webkit-flex;
@@ -90,4 +183,8 @@ h4 {
           justify-content: center;
   -webkit-align-items: center;
           align-items: center;
+}
+.indent {
+  display: inline-block;
+  width: 20px;
 }
