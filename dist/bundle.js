@@ -29977,6 +29977,9 @@ exports.launch = launch;
 exports.move = move;
 exports.handleCollision = handleCollision;
 exports.display = display;
+exports.toggleGame = toggleGame;
+exports.serve = serve;
+exports.swapWindow = swapWindow;
 function getContext(context) {
   return {
     type: 'GET_CONTEXT',
@@ -30009,6 +30012,25 @@ function display(obj) {
   return {
     type: 'DISPLAY',
     obj: obj
+  };
+}
+
+function toggleGame() {
+  return {
+    type: 'TOGGLE_GAME'
+  };
+}
+
+function serve() {
+  return {
+    type: 'SERVE'
+  };
+}
+
+function swapWindow(currentWindow) {
+  return {
+    type: 'SWAP_WINDOW',
+    currentWindow: currentWindow
   };
 }
 
@@ -30075,7 +30097,7 @@ _reactDom2.default.render(_react2.default.createElement(
   _react2.default.createElement(App, null)
 ), document.getElementById('main'));
 
-},{"./components/Main.jsx":505,"./store":514,"babel-polyfill":1,"react":484,"react-dom":325,"react-redux":329}],504:[function(require,module,exports){
+},{"./components/Main.jsx":506,"./store":517,"babel-polyfill":1,"react":484,"react-dom":325,"react-redux":329}],504:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -30118,29 +30140,34 @@ var Game = function (_Component) {
 
     _this.state = {
       running: null,
-      plr: props.paddleLeft.rotation,
-      hideCourt: false
+      plr: props.paddleLeft.rotation
     };
     return _this;
   }
 
   _createClass(Game, [{
-    key: 'beginGame',
-    value: function beginGame() {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      if (!this.props.context) {
+        this.props.getContext(this._canvas.getContext("2d"));
+      }
       this.setState({
-        running: window.requestAnimationFrame(this.update.bind(this)),
-        hideCourt: true
+        running: window.requestAnimationFrame(this.update.bind(this))
       });
-      this.props.launch();
     }
   }, {
-    key: 'endGame',
-    value: function endGame() {
-      this.props.launch();
-      window.cancelAnimationFrame(this.state.running);
-      this.setState({
-        running: null
-      });
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      if (nextProps.service) {
+        this.props.serve();
+
+        if (nextProps.score.left === 11 || nextProps.score.left === 11) {
+          window.cancelAnimationFrame(this.state.running);
+          this.setState({
+            running: null
+          });
+        }
+      }
     }
   }, {
     key: 'playerUp',
@@ -30172,7 +30199,6 @@ var Game = function (_Component) {
       var move = _props.move;
       var handleCollision = _props.handleCollision;
       var display = _props.display;
-      var getContext = _props.getContext;
       var objs = ['paddleLeft', 'paddleRight', 'ball'];
 
       function checkPaddleCollision(ball, paddle) {
@@ -30194,7 +30220,6 @@ var Game = function (_Component) {
         }
       }
 
-      getContext(this._canvas.getContext("2d"));
       display('court');
       paddleRight.autoPilot(ball);
 
@@ -30226,31 +30251,23 @@ var Game = function (_Component) {
 
       return _react2.default.createElement(
         'div',
-        null,
-        _react2.default.createElement(_reactKeyHandler2.default, { keyEventName: _reactKeyHandler.KEYPRESS, keyValue: 'w', onKeyHandle: this.playerUp.bind(this) }),
-        _react2.default.createElement(_reactKeyHandler2.default, { keyEventName: _reactKeyHandler.KEYPRESS, keyValue: 's', onKeyHandle: this.playerDown.bind(this) }),
-        _react2.default.createElement(_reactKeyHandler2.default, { keyEventName: _reactKeyHandler.KEYPRESS, keyValue: 'a',
+        { id: 'canvas' },
+        _react2.default.createElement(_reactKeyHandler2.default, { keyEventName: _reactKeyHandler.KEYPRESS, keyValue: "w" || "ArrowUp", onKeyHandle: this.playerUp.bind(this) }),
+        _react2.default.createElement(_reactKeyHandler2.default, { keyEventName: _reactKeyHandler.KEYPRESS, keyValue: "s" || "ArrowDown", onKeyHandle: this.playerDown.bind(this) }),
+        _react2.default.createElement(_reactKeyHandler2.default, { keyEventName: _reactKeyHandler.KEYPRESS, keyValue: "a" || "ArrowLeft",
           onKeyHandle: paddleLeft.fullyCharged ? this.playerBurst.bind(this) : function () {
             return paddleLeft.windingUp = [true, -1];
           } }),
-        _react2.default.createElement(_reactKeyHandler2.default, { keyEventName: _reactKeyHandler.KEYPRESS, keyValue: 'd',
+        _react2.default.createElement(_reactKeyHandler2.default, { keyEventName: _reactKeyHandler.KEYPRESS, keyValue: "d" || "ArrowRight",
           onKeyHandle: paddleLeft.fullyCharged ? this.playerBurst.bind(this) : function () {
             return paddleLeft.windingUp = [true, 1];
           } }),
-        _react2.default.createElement('canvas', {
-          id: 'canvas',
-          className: this.state.hideCourt ? 'revealed' : 'hidden',
-          ref: function ref(c) {
+        _react2.default.createElement('canvas', { ref: function ref(c) {
             return _this2._canvas = c;
           },
           width: this.props.court.size.w,
-          height: this.props.court.size.h,
-          onBlur: this.endGame.bind(this),
-          onClick: this.props.launch }),
-        _react2.default.createElement('img', { className: this.state.hideCourt ? 'hidden' : 'revealed',
-          onFocus: this.beginGame.bind(this),
-          tabIndex: '0',
-          id: 'pongCourt', src: './pongCourt.png', alt: '' })
+          height: this.props.court.size.h }),
+        _react2.default.createElement('img', { id: 'pongCourt', src: './pongCourt.png', alt: 'Pong Court', style: { display: 'none' } })
       );
     }
   }]);
@@ -30264,7 +30281,10 @@ function mapStateToProps(state) {
     paddleLeft: state.paddleLeft,
     paddleRight: state.paddleRight,
     collider: state.collider,
-    court: state.court
+    court: state.court,
+    context: state.context,
+    service: state.service,
+    score: state.score
   };
 }
 
@@ -30272,9 +30292,6 @@ function mapDispatchToProps(dispatch) {
   return {
     getContext: function getContext(context) {
       dispatch((0, _actions.getContext)(context));
-    },
-    launch: function launch() {
-      dispatch((0, _actions.launch)());
     },
     move: function move(obj) {
       dispatch((0, _actions.move)(obj));
@@ -30284,13 +30301,240 @@ function mapDispatchToProps(dispatch) {
     },
     display: function display(obj) {
       dispatch((0, _actions.display)(obj));
+    },
+    serve: function serve() {
+      dispatch((0, _actions.serve)());
     }
   };
 }
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(Game);
 
-},{"../actions":502,"../game_objects/Collider.js":509,"react":484,"react-key-handler":326,"react-redux":329}],505:[function(require,module,exports){
+},{"../actions":502,"../game_objects/Collider.js":512,"react":484,"react-key-handler":326,"react-redux":329}],505:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRedux = require('react-redux');
+
+var _actions = require('../actions');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Instructions = function (_Component) {
+  _inherits(Instructions, _Component);
+
+  function Instructions(props) {
+    _classCallCheck(this, Instructions);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Instructions).call(this, props));
+
+    _this.state = {
+      showControls: true,
+      showRules: false
+    };
+    return _this;
+  }
+
+  _createClass(Instructions, [{
+    key: 'collapseControls',
+    value: function collapseControls() {
+      this.setState({ showRules: true, showControls: false });
+    }
+  }, {
+    key: 'collapseRules',
+    value: function collapseRules() {
+      this.setState({ showRules: false, showControls: true });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _state = this.state;
+      var showControls = _state.showControls;
+      var showRules = _state.showRules;
+
+
+      return _react2.default.createElement(
+        'div',
+        { id: 'instructions', className: 'column' },
+        _react2.default.createElement(
+          'div',
+          { id: 'infoButtons', className: 'row' },
+          _react2.default.createElement(
+            'button',
+            { type: 'button',
+              onClick: this.collapseRules.bind(this) },
+            'Controls'
+          ),
+          _react2.default.createElement(
+            'button',
+            { type: 'button',
+              onClick: this.collapseControls.bind(this) },
+            'Rules'
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: (showControls ? 'revealed' : 'hidden') + ' info-text' },
+          _react2.default.createElement(
+            'h3',
+            { className: 'row' },
+            'Controls'
+          ),
+          _react2.default.createElement(
+            'ul',
+            { className: 'column' },
+            _react2.default.createElement(
+              'li',
+              null,
+              'Press the ',
+              _react2.default.createElement(
+                'span',
+                null,
+                'Right Arrow'
+              ),
+              ' or the ',
+              _react2.default.createElement(
+                'span',
+                null,
+                '"W"'
+              ),
+              ' key to move your paddle up.'
+            ),
+            _react2.default.createElement(
+              'li',
+              null,
+              'Press the ',
+              _react2.default.createElement(
+                'span',
+                null,
+                'Left Arrow'
+              ),
+              ' or the ',
+              _react2.default.createElement(
+                'span',
+                null,
+                '"S"'
+              ),
+              ' key to move your paddle down.'
+            ),
+            _react2.default.createElement(
+              'li',
+              null,
+              'Hitting the ',
+              _react2.default.createElement(
+                'span',
+                null,
+                'Left Arrow'
+              ),
+              ' or the ',
+              _react2.default.createElement(
+                'span',
+                null,
+                '"A"'
+              ),
+              ' key',
+              _react2.default.createElement('br', null),
+              _react2.default.createElement('span', { className: 'indent' }),
+              'will tilt your paddle to face up.'
+            ),
+            _react2.default.createElement(
+              'li',
+              null,
+              'while hitting the ',
+              _react2.default.createElement(
+                'span',
+                null,
+                'Right Arrow'
+              ),
+              ' or the ',
+              _react2.default.createElement(
+                'span',
+                null,
+                '"D"'
+              ),
+              ' key',
+              _react2.default.createElement('br', null),
+              _react2.default.createElement('span', { className: 'indent' }),
+              'will tilt it to face down.'
+            )
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: (showRules ? 'revealed' : 'hidden') + ' info-text' },
+          _react2.default.createElement(
+            'h3',
+            { className: 'row' },
+            'Rules'
+          ),
+          _react2.default.createElement(
+            'ul',
+            { className: 'column' },
+            _react2.default.createElement(
+              'li',
+              null,
+              'Your paddle will accelerate each time you hit one of the movement keys.'
+            ),
+            _react2.default.createElement(
+              'li',
+              null,
+              'When it\'s your turn to serve, click the launch button to set the ball in motion.'
+            ),
+            _react2.default.createElement(
+              'li',
+              null,
+              'Try to bounce the ball past your opponent\'s paddle to score a point.'
+            )
+          ),
+          _react2.default.createElement(
+            'p',
+            null,
+            _react2.default.createElement(
+              'strong',
+              null,
+              'Experiment with the tilt controls to launch tricky shots!  The first player to score eleven points wins the game.'
+            )
+          )
+        ),
+        _react2.default.createElement(
+          'button',
+          { type: 'button',
+            onClick: this.props.swapWindow },
+          'Back'
+        )
+      );
+    }
+  }]);
+
+  return Instructions;
+}(_react.Component);
+
+function mapDispatchToProps(dispatch) {
+  return {
+    swapWindow: function swapWindow() {
+      dispatch((0, _actions.swapWindow)('menu'));
+    }
+  };
+}
+
+exports.default = (0, _reactRedux.connect)(null, mapDispatchToProps)(Instructions);
+
+},{"../actions":502,"react":484,"react-redux":329}],506:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -30313,6 +30557,18 @@ var _PlayerScore = require('./PlayerScore.jsx');
 
 var _PlayerScore2 = _interopRequireDefault(_PlayerScore);
 
+var _Menu = require('./Menu.jsx');
+
+var _Menu2 = _interopRequireDefault(_Menu);
+
+var _Instructions = require('./Instructions.jsx');
+
+var _Instructions2 = _interopRequireDefault(_Instructions);
+
+var _WinScreen = require('./WinScreen.jsx');
+
+var _WinScreen2 = _interopRequireDefault(_WinScreen);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -30331,27 +30587,52 @@ var Main = function (_Component) {
   }
 
   _createClass(Main, [{
+    key: 'handleWindow',
+    value: function handleWindow(currentWindow) {
+      switch (currentWindow) {
+        case 'menu':
+          return _react2.default.createElement(_Menu2.default, null);
+          break;
+        case 'instructions':
+          return _react2.default.createElement(_Instructions2.default, null);
+          break;
+        case 'game':
+          return _react2.default.createElement(_Game2.default, null);
+          break;
+        case 'winScreen':
+          return _react2.default.createElement(_WinScreen2.default, { score: { left: this.props.scoreLeft, right: this.props.scoreRight } });
+          break;
+      }
+    }
+  }, {
     key: 'render',
     value: function render() {
+      var _props = this.props;
+      var scoreLeft = _props.scoreLeft;
+      var scoreRight = _props.scoreRight;
+      var currentWindow = _props.currentWindow;
+      var playing = _props.playing;
+
+
       return _react2.default.createElement(
         'div',
-        { id: 'container',
-          className: 'column' },
+        { className: 'column' },
         _react2.default.createElement(
           'div',
-          { id: 'title', className: 'row centered' },
+          { id: 'container', className: 'row centered' },
+          _react2.default.createElement(_PlayerScore2.default, { id: "left",
+            score: scoreLeft,
+            player: 'Blue',
+            playing: playing }),
           _react2.default.createElement(
-            'h1',
-            null,
-            'blocPong'
-          )
-        ),
-        _react2.default.createElement(
-          'div',
-          { id: 'game', className: 'row centered' },
-          _react2.default.createElement(_PlayerScore2.default, { id: "left", score: this.props.scoreLeft, player: 'Blue' }),
-          _react2.default.createElement(_Game2.default, null),
-          _react2.default.createElement(_PlayerScore2.default, { id: "right", score: this.props.scoreRight, player: 'Red' })
+            'div',
+            { id: 'currentWindow',
+              className: 'column' },
+            this.handleWindow(currentWindow)
+          ),
+          _react2.default.createElement(_PlayerScore2.default, { id: "right",
+            score: scoreRight,
+            player: 'Red' })
         )
       );
     }
@@ -30363,48 +30644,126 @@ var Main = function (_Component) {
 function mapStateToProps(state) {
   return {
     scoreLeft: state.score.left,
-    scoreRight: state.score.right
+    scoreRight: state.score.right,
+    currentWindow: state.currentWindow,
+    playing: state.playing
   };
 }
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps, null)(Main);
 
-},{"./Game.jsx":504,"./PlayerScore.jsx":506,"react":484,"react-redux":329}],506:[function(require,module,exports){
-"use strict";
+},{"./Game.jsx":504,"./Instructions.jsx":505,"./Menu.jsx":507,"./PlayerScore.jsx":508,"./WinScreen.jsx":509,"react":484,"react-redux":329}],507:[function(require,module,exports){
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _react = require("react");
+var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _reactRedux = require('react-redux');
+
+var _actions = require('../actions');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Score = function Score(_ref) {
+var Menu = function Menu(_ref) {
+  var toggleGame = _ref.toggleGame;
+  var swapWindow = _ref.swapWindow;
+
+
+  function beginGame() {
+    swapWindow('game');
+    toggleGame();
+  }
+
+  return _react2.default.createElement(
+    'div',
+    { id: 'menu', className: 'column centered' },
+    _react2.default.createElement('img', { id: 'blocPongLogo', src: './logo.png', alt: 'Bloc Pong Logo' }),
+    _react2.default.createElement(
+      'div',
+      { id: 'menuButtons', className: 'row' },
+      _react2.default.createElement(
+        'button',
+        { type: 'button',
+          onClick: beginGame },
+        'Play'
+      ),
+      _react2.default.createElement(
+        'button',
+        { type: 'button',
+          onClick: swapWindow.bind(null, 'instructions') },
+        'Controls'
+      )
+    )
+  );
+};
+
+function mapDispatchToProps(dispatch) {
+  return {
+    toggleGame: function toggleGame() {
+      dispatch((0, _actions.toggleGame)());
+    },
+    swapWindow: function swapWindow(newWindow) {
+      dispatch((0, _actions.swapWindow)(newWindow));
+    }
+  };
+}
+
+exports.default = (0, _reactRedux.connect)(null, mapDispatchToProps)(Menu);
+
+},{"../actions":502,"react":484,"react-redux":329}],508:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _actions = require('../actions');
+
+var _reactRedux = require('react-redux');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var PlayerScore = function PlayerScore(_ref) {
   var id = _ref.id;
   var score = _ref.score;
   var player = _ref.player;
+  var playing = _ref.playing;
+  var launch = _ref.launch;
 
 
   return _react2.default.createElement(
-    "div",
-    { id: id, className: "player-display column centered" },
+    'div',
+    { id: id, className: 'player-display column' },
     _react2.default.createElement(
-      "div",
-      { className: "player-title row centered" },
+      'div',
+      { className: 'player-title row centered' },
       _react2.default.createElement(
-        "h2",
+        'h2',
         null,
         player
       )
     ),
     _react2.default.createElement(
-      "div",
-      { className: "player-score row centered" },
+      'button',
+      { type: 'button',
+        onClick: launch,
+        disabled: player === 'Red' || !playing ? true : false },
+      'Serve'
+    ),
+    _react2.default.createElement(
+      'div',
+      { className: 'player-score row centered' },
       _react2.default.createElement(
-        "h3",
+        'h3',
         null,
         score
       )
@@ -30412,9 +30771,68 @@ var Score = function Score(_ref) {
   );
 };
 
-exports.default = Score;
+function mapDispatchToProps(dispatch) {
+  return { launch: function launch() {
+      dispatch((0, _actions.launch)());
+    } };
+}
 
-},{"react":484}],507:[function(require,module,exports){
+exports.default = (0, _reactRedux.connect)(null, mapDispatchToProps)(PlayerScore);
+
+},{"../actions":502,"react":484,"react-redux":329}],509:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRedux = require('react-redux');
+
+var _actions = require('../actions');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var WinScreen = function WinScreen(_ref) {
+  var score = _ref.score;
+  var swapWindow = _ref.swapWindow;
+
+
+  return _react2.default.createElement(
+    'div',
+    { id: 'winScreen', className: 'column' },
+    score.left > score.right ? _react2.default.createElement(
+      'h2',
+      { className: 'row centered' },
+      '\'Blue Wins!\''
+    ) : _react2.default.createElement(
+      'h2',
+      { className: 'row centered' },
+      '\'Red Wins!\''
+    ),
+    _react2.default.createElement(
+      'button',
+      { type: 'button',
+        onClick: swapWindow },
+      'Main Menu'
+    )
+  );
+};
+
+function mapDispatchToProps(dispatch) {
+  return {
+    swapWindow: function swapWindow() {
+      dispatch((0, _actions.swapWindow)('menu'));
+    }
+  };
+}
+
+exports.default = (0, _reactRedux.connect)(null, mapDispatchToProps)(WinScreen);
+
+},{"../actions":502,"react":484,"react-redux":329}],510:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -30473,7 +30891,7 @@ var AABB = function () {
 
 exports.default = AABB;
 
-},{"./Vector.js":512}],508:[function(require,module,exports){
+},{"./Vector.js":515}],511:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -30517,6 +30935,7 @@ var Ball = function () {
         h: this.radius * 2
       }
     });
+    this.scored = false;
   }
 
   _createClass(Ball, [{
@@ -30526,13 +30945,8 @@ var Ball = function () {
         return Math.floor(Math.random() * 2);
       };
 
-      if (this.vel.pos.x === 0 && this.vel.pos.y === 0) {
-        this.vel.pos.x -= this.acc;
-        this.vel.pos.y += flip > 0 ? this.acc / 2 : -this.acc / 2;
-      } else {
-        this.vel.pos.x = 0;
-        this.vel.pos.y = 0;
-      }
+      this.vel.pos.y += flip > 0 ? this.acc / 2 : -this.acc / 2;
+      this.vel.pos.x += this.acc;
     }
   }, {
     key: 'move',
@@ -30638,7 +31052,7 @@ var Ball = function () {
 
 exports.default = Ball;
 
-},{"./AABB.js":507,"./Vector.js":512}],509:[function(require,module,exports){
+},{"./AABB.js":510,"./Vector.js":515}],512:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -30775,7 +31189,7 @@ var Collider = function () {
 
 exports.default = Collider;
 
-},{"./Vector.js":512}],510:[function(require,module,exports){
+},{"./Vector.js":515}],513:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -30840,7 +31254,7 @@ var Court = function () {
       var h = _size2.h;
       var bg = document.getElementById('pongCourt');
       ctx.clearRect(0, 0, w, h);
-      ctx.drawImage(bg, 0, 0, 600, 500);
+      ctx.drawImage(bg, 0, 0, w, h);
     }
   }]);
 
@@ -30849,7 +31263,7 @@ var Court = function () {
 
 exports.default = Court;
 
-},{"./AABB.js":507,"./Vector.js":512}],511:[function(require,module,exports){
+},{"./AABB.js":510,"./Vector.js":515}],514:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -31061,7 +31475,7 @@ var Paddle = function () {
 
 exports.default = Paddle;
 
-},{"./Vector.js":512}],512:[function(require,module,exports){
+},{"./Vector.js":515}],515:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31187,7 +31601,7 @@ var Vector = function () {
 
 exports.default = Vector;
 
-},{}],513:[function(require,module,exports){
+},{}],516:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31236,7 +31650,7 @@ function rootReducer() {
           var givePoints = action.result[1] === 1 ? 'left' : 'right';
           newState.score = state.score;
           newState.score[givePoints] += 1;
-          state.ball.toCenter(state.court.pos);
+          newState.service = true;
         } else {
           state[action.obj].handleCollision(action.result);
         }
@@ -31247,12 +31661,36 @@ function rootReducer() {
       state[action.obj].display(state.context);
 
       return state;
+    case "SERVE":
+
+      state.ball.toCenter(state.court.pos);
+
+      if (state.score.left === 2 || state.score.right === 2) {
+        newState.currentWindow = 'winScreen';
+      }
+
+      newState.service = false;
+
+      return _extends({}, state, newState);
+    case "TOGGLE_GAME":
+
+      newState.playing = state.playing ? false : true;
+      if (newState.playing) {
+        newState.score = { left: 0, right: 0 };
+      }
+
+      return _extends({}, state, newState);
+    case "SWAP_WINDOW":
+
+      newState.currentWindow = action.currentWindow;
+
+      return _extends({}, state, newState);
     default:
       return state;
   }
 }
 
-},{"./game_objects/Vector":512}],514:[function(require,module,exports){
+},{"./game_objects/Vector":515}],517:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -31296,10 +31734,14 @@ var _Collider2 = _interopRequireDefault(_Collider);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 //middleware
-var logger = (0, _reduxLogger2.default)();
+var logger = (0, _reduxLogger2.default)({
+  predicate: function predicate(getState, action) {
+    return action.type !== 'MOVE' && action.type !== 'DISPLAY' && action.type !== 'HANDLE_COLLISION';
+  }
+});
 
 var middleware = [logger, _reduxThunk2.default],
-    court = { w: 600, h: 500 },
+    court = { w: 580, h: 480 },
     paddleXOffset = 40,
     paddleSize = { w: 15, h: 70 },
     paddleSpeed = 3,
@@ -31378,15 +31820,15 @@ var store = (0, _redux.createStore)(_rootReducer2.default, { paddleLeft: new _Pa
     vel: new _Vector2.default({ pos: { x: 0, y: 0 } })
   }),
   court: new _Court2.default({ size: court }),
+  playing: false,
   collider: new _Collider2.default(),
-  score: { left: 0, right: 0 }
-}
-//  applyMiddleware(...middleware)
-);
+  score: { left: 0, right: 0 },
+  currentWindow: 'menu'
+}, _redux.applyMiddleware.apply(undefined, middleware));
 
 exports.default = store;
 
-},{"./game_objects/Ball":508,"./game_objects/Collider.js":509,"./game_objects/Court.js":510,"./game_objects/Paddle":511,"./game_objects/Vector.js":512,"./rootReducer":513,"redux":492,"redux-logger":485,"redux-thunk":486}]},{},[503])
+},{"./game_objects/Ball":511,"./game_objects/Collider.js":512,"./game_objects/Court.js":513,"./game_objects/Paddle":514,"./game_objects/Vector.js":515,"./rootReducer":516,"redux":492,"redux-logger":485,"redux-thunk":486}]},{},[503])
 
 
 //# sourceMappingURL=bundle.js.map
